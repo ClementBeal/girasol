@@ -1,9 +1,18 @@
 library;
 
-export 'src/executor.dart' show Girasol;
+export 'src/executor.dart'
+    show Girasol, ParseResult, ParsedData, ParsedEmpty, ParsedLink;
 
 // Crawlers export
-export 'src/scrapers/scraper.dart' show WebCrawler, StaticWebCrawler;
+export 'src/scrapers/scraper.dart'
+    show
+        WebCrawler,
+        StaticWebCrawler,
+        CrawlDocument,
+        FileDocument,
+        HTMLDocument,
+        JsonDocument,
+        TextDocument;
 
 // Pipelines export
 export 'src/pipelines/pipeline.dart' show Pipeline;
@@ -15,4 +24,8 @@ export 'src/pipelines/format/xml_pipeline.dart' show XMLPipeline, XmlItem;
 
 // HTTP client
 
-export 'src/utils/browser_http_client.dart' show BrowserHttpClient;
+export 'src/utils/browser_http_client.dart'
+    show BrowserHttpClient, CrawlRequest, CrawlResponse;
+
+export 'package:xml/xml.dart';
+export 'package:html/parser.dart';

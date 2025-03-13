@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
 import '../girasol.dart';
-import 'scrapers/scraper.dart';
-import 'utils/browser_http_client.dart';
 
 /// Base class for crawling results
 abstract class ParseResult {}

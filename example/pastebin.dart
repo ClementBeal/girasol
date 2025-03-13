@@ -1,7 +1,4 @@
 import 'package:girasol/girasol.dart';
-import 'package:girasol/src/executor.dart';
-import 'package:girasol/src/scrapers/scraper.dart';
-import 'package:girasol/src/utils/browser_http_client.dart';
 
 class PastebinItem implements JsonItem {
   final String title;

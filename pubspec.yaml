@@ -1,6 +1,6 @@
 name: girasol
 description: A web crawler written in Dart totally asynchronous
-version: 0.0.1
+version: 0.0.2
 repository: https://github.com/ClementBeal/girasol
 
 topics:
