@@ -1,7 +1,7 @@
 name: girasol
-description: A starting point for Dart libraries or applications.
-version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+description: A web crawler written in Dart totally asynchronous
+version: 0.0.1
+repository: https://github.com/ClementBeal/girasol
 
 topics:
   - network
