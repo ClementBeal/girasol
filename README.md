@@ -1,6 +1,6 @@
 # Dart Web Crawler
 
-A powerful and parallel web crawler for Dart, inspired by [Scrapy](https://scrapy.org/). This package allows you to scrape websites efficiently using `WebCrawler` instances and export data in multiple formats.
+A powerful and parallel web crawler for Dart, inspired by [Scrapy](https://scrapy.org/). This package allows you to scrape websites efficiently using `girasol` instances and export data in multiple formats.
 
 ## Features
 
@@ -13,15 +13,8 @@ A powerful and parallel web crawler for Dart, inspired by [Scrapy](https://scrap
 
 Add the package to your `pubspec.yaml`:
 
-```yaml
-dependencies:
-  dart_web_crawler: latest_version
-```
-
-Then, run:
-
 ```sh
-dart pub get
+dart pub add girasol
 ```
 
 ## Usage
@@ -29,7 +22,7 @@ dart pub get
 ### Define a Web Crawler
 
 ```dart
-import 'package:dart_web_crawler/dart_web_crawler.dart';
+import 'package:girasol/girasol.dart';
 
 class PastebinItem implements JsonItem {
   final String title;
