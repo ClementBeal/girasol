@@ -14,6 +14,9 @@ export 'src/scrapers/scraper.dart'
         JsonDocument,
         TextDocument;
 
+export 'src/scrapers/e_commerce_crawler.dart'
+    show ECommerceCrawler, EcommerceItem;
+
 // Pipelines export
 export 'src/pipelines/pipeline.dart' show Pipeline;
 
@@ -29,3 +32,8 @@ export 'src/utils/browser_http_client.dart'
 
 export 'package:xml/xml.dart';
 export 'package:html/parser.dart';
+
+// Collectors
+
+export 'src/collectors/navbar_collector.dart' show NavbarCollector;
+export 'src/collectors/pagination_collector.dart' show PaginationCollector;
