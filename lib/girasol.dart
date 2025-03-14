@@ -15,7 +15,7 @@ export 'src/scrapers/scraper.dart'
         TextDocument;
 
 export 'src/scrapers/e_commerce_crawler.dart'
-    show ECommerceCrawler, EcommerceItem;
+    show ECommerceCrawler, EcommerceItem, ECommerceCrawlerSelectors;
 
 // Pipelines export
 export 'src/pipelines/pipeline.dart' show Pipeline;

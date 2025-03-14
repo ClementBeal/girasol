@@ -54,10 +54,15 @@ abstract class WebCrawler<ParsedItem> {
 abstract class StaticWebCrawler<ParsedItem> extends WebCrawler<ParsedItem> {
   final int concurrentRequests;
 
+  /// Limits how many levels deep the crawler will go when following links.
+  /// If null, it will keep crawling without a depth limit.
+  final int? maxDepth;
+
   StaticWebCrawler({
     super.shouldFollowRedirects = true,
     required super.name,
     this.concurrentRequests = 1,
+    this.maxDepth,
   });
 
   @override

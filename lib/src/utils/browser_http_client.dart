@@ -145,13 +145,20 @@ class BrowserHttpClient {
 
 /// Represents an HTTP request
 class CrawlRequest {
+  /// The URL of the request
   final Uri url;
-  final String method; // 'GET', 'POST', 'PUT', etc.
+
+  /// HTTP method : GET, PUT, POST, DELETE...
+  final String method;
+
   final Map<String, String>? headers;
-  final dynamic
-  body; // Can be String, Map, List, etc.  Handles different content types
-  final String?
-  contentType; // e.g., 'application/json', 'application/x-www-form-urlencoded'
+  final dynamic body;
+  final String? contentType;
+
+  /// Represent the current depth of the request.
+  ///
+  /// "1" means it's a request from the first level
+  final int depth;
 
   CrawlRequest({
     required this.url,
@@ -159,6 +166,7 @@ class CrawlRequest {
     this.headers,
     this.body,
     this.contentType,
+    this.depth = 1,
   });
 
   // Helper method for creating POST requests
@@ -167,6 +175,7 @@ class CrawlRequest {
     Map<String, String>? headers,
     dynamic body,
     String? contentType,
+    int? depth,
   }) {
     return CrawlRequest(
       url: url,
@@ -174,11 +183,17 @@ class CrawlRequest {
       headers: headers,
       body: body,
       contentType: contentType,
+      depth: depth ?? 1,
     );
   }
 
-  static CrawlRequest get(Uri url, {Map<String, String>? headers}) {
-    return CrawlRequest(url: url, method: 'GET', headers: headers);
+  static CrawlRequest get(Uri url, {Map<String, String>? headers, int? depth}) {
+    return CrawlRequest(
+      url: url,
+      method: 'GET',
+      headers: headers,
+      depth: depth ?? 1,
+    );
   }
 }
 
