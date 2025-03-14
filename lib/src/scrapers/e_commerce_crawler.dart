@@ -1,16 +1,18 @@
 import 'package:girasol/girasol.dart';
 import 'package:html/dom.dart';
 
+/// Represents a product from an e-commerce website.
+/// Contains all common product data like name, price, description, etc.
 class EcommerceItem implements JsonItem {
-  final String id;
   final String name;
-  final String? description;
   final String url;
+  final String? id;
+  final String? description;
   final String? imageUrl;
   final double? price;
   final double? originalPrice;
-  final String currency;
-  final bool inStock;
+  final String? currency;
+  final bool? inStock;
   final int? stock;
   final double? rating;
   final int? reviewCount;
@@ -21,10 +23,10 @@ class EcommerceItem implements JsonItem {
   final DateTime? lastUpdated;
 
   EcommerceItem({
-    required this.id,
     required this.name,
     required this.url,
-    required this.currency,
+    this.id,
+    this.currency,
     this.description,
     this.imageUrl,
     this.price,
@@ -41,137 +43,130 @@ class EcommerceItem implements JsonItem {
   });
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'url': url,
-      'imageUrl': imageUrl,
-      'price': price,
-      'originalPrice': originalPrice,
-      'currency': currency,
-      'inStock': inStock,
-      'stock': stock,
-      'rating': rating,
-      'reviewCount': reviewCount,
-      'brand': brand,
-      'category': category,
-      'tags': tags,
-      'seller': seller,
-      'lastUpdated':
-          lastUpdated?.toIso8601String(), // Convert DateTime to ISO string
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'description': description,
+    'url': url,
+    'imageUrl': imageUrl,
+    'price': price,
+    'originalPrice': originalPrice,
+    'currency': currency,
+    'inStock': inStock,
+    'stock': stock,
+    'rating': rating,
+    'reviewCount': reviewCount,
+    'brand': brand,
+    'category': category,
+    'tags': tags,
+    'seller': seller,
+    'lastUpdated': lastUpdated?.toIso8601String(),
+  };
 }
 
-/// The [ECommerceCrawler] is able to scrape a usual e-commerce static website
-/// It works in 2 steps. First, it gathers all the categories
-class ECommerceCrawler<T extends EcommerceItem> extends StaticWebCrawler<T> {
-  final Uri mainUrl;
-
-  /// This collector will collect all the links from the navbar.
-  final NavbarCollector? navbarCollector;
-
-  /// A bunch of initial URIs that the crawler will use
-  final List<Uri> initialUris;
-
-  /// This collector collects all the links from the pagination bar
-  final PaginationCollector paginationCollector;
-
-  /// CSS selector to select a product card that also contains all the data.
-  /// This is the main container for each product on a listing page.
-  /// Examples: 'div.product', 'li.product-item', '.product-card'
+/// Defines all CSS selectors needed to extract product data from an e-commerce website.
+class ECommerceCrawlerSelectors {
+  /// CSS selector for the container of each product in a listing
   final String productBoxSelector;
 
-  /// Selector for extracting the product ID.
-  /// This often targets data attributes or specific ID elements.
-  /// Examples: '[data-product-id]', '.sku', '.product-id'
-  final String idSelector;
+  /// Selector for product ID (typically data attributes)
+  final String? idSelector;
 
-  /// Selector for extracting the product name.
-  /// This typically targets heading elements within the product card.
-  /// Examples: 'h2.product-name', '.product-title', 'a.product-link'
+  /// Selector for product name or title
   final String nameSelector;
 
-  /// Selector for extracting the product description.
-  /// This targets elements containing short product descriptions on listing pages.
-  /// Examples: 'p.description', '.product-excerpt', '.short-desc'
+  /// Selector for product description
   final String? descriptionSelector;
 
-  /// Selector for extracting the product image URL.
-  /// This typically targets the main product image element.
-  /// Examples: 'img.product-image', '.thumbnail img', '.product-photo'
+  /// Selector for product image
   final String? imageUrlSelector;
 
-  /// Selector for extracting the current price.
-  /// This targets elements displaying the active selling price.
-  /// Examples: '.price', 'span.current-price', '.sale-price'
+  /// Selector for current selling price
   final String? priceSelector;
 
-  /// Selector for extracting the original price (for discounted items).
-  /// This targets elements showing the pre-discount or regular price.
-  /// Examples: '.original-price', 'del.price', '.regular-price'
+  /// Selector for original price (before discount)
   final String? originalPriceSelector;
 
-  /// The currency symbol used on the site.
-  /// This is a static value rather than extracted, for consistency.
-  /// Examples: '$', '€', '£', '¥'
-  final String currencySymbol;
+  /// Currency symbol used on the site
+  final String? currencySymbol;
 
-  /// Selector for determining if the product is in stock.
-  /// This targets elements that display stock status information.
-  /// Examples: '.stock-status', '.availability', 'span.in-stock'
-  /// Note: The crawler checks for text like "out of stock" or "sold out"
+  /// Selector for stock status information
   final String? inStockSelector;
 
-  /// Selector for extracting the quantity in stock.
-  /// This targets elements showing the specific number of items available.
-  /// Examples: '.stock-quantity', 'span.qty', '.inventory-count'
+  /// Selector for quantity available
   final String? stockSelector;
 
-  /// Selector for extracting the product rating.
-  /// This targets elements displaying customer ratings (stars, numbers, etc.).
-  /// Examples: '.rating', '.stars', 'span.star-rating'
+  /// Selector for product ratings
   final String? ratingSelector;
 
-  /// Selector for extracting the number of reviews.
-  /// This targets elements showing how many customer reviews exist.
-  /// Examples: '.review-count', 'span.reviews', '.rating-count'
+  /// Selector for number of reviews
   final String? reviewCountSelector;
 
-  /// Selector for extracting the product brand.
-  /// This targets elements displaying the manufacturer or brand name.
-  /// Examples: '.brand', 'span.manufacturer', '.vendor'
+  /// Selector for brand/manufacturer name
   final String? brandSelector;
 
-  /// Selector for extracting the product category.
-  /// This targets elements showing which category the product belongs to.
-  /// Examples: '.category', 'span.product-type', '.breadcrumb'
+  /// Selector for product category
   final String? categorySelector;
 
-  /// Selector for extracting product tags.
-  /// This targets multiple elements containing tag information.
-  /// Examples: '.tag', 'span.product-tag', '.labels span'
+  /// Selector for product tags
   final String? tagsSelector;
 
-  /// Selector for extracting the seller information.
-  /// This targets elements showing the merchant or seller name (for marketplaces).
-  /// Examples: '.seller', 'span.store-name', '.merchant-info'
+  /// Selector for merchant/seller information
   final String? sellerSelector;
 
-  /// Function that creates a custom instance of T (EcommerceItem subclass)
-  /// This allows users to provide their own factory for creating custom EcommerceItem subclasses
+  ECommerceCrawlerSelectors({
+    required this.productBoxSelector,
+    this.idSelector,
+    required this.nameSelector,
+    this.descriptionSelector,
+    this.imageUrlSelector,
+    this.priceSelector,
+    this.originalPriceSelector,
+    this.currencySymbol,
+    this.inStockSelector,
+    this.stockSelector,
+    this.ratingSelector,
+    this.reviewCountSelector,
+    this.brandSelector,
+    this.categorySelector,
+    this.tagsSelector,
+    this.sellerSelector,
+  });
+}
+
+/// Crawler designed specifically for e-commerce websites.
+/// Extracts product information using provided CSS selectors.
+/// Navigates pagination and can optionally visit product detail pages.
+class ECommerceCrawler<T extends EcommerceItem> extends StaticWebCrawler<T> {
+  /// Main URL of the e-commerce site
+  final Uri mainUrl;
+
+  /// Whether to visit each product's detail page
+  final bool navigateToProductPage;
+
+  /// For collecting navigation menu links
+  final NavbarCollector? navbarCollector;
+
+  /// Starting URLs for crawling
+  final List<Uri> initialUris;
+
+  /// For collecting pagination links
+  final PaginationCollector? paginationCollector;
+
+  /// All CSS selectors for data extraction
+  final ECommerceCrawlerSelectors selectors;
+
+  /// Factory function to create custom EcommerceItem instances
   final T Function(
-    String id,
+    String? id,
     String name,
     String url,
-    String currency,
+    String? currency,
     String? description,
     String? imageUrl,
     double? price,
     double? originalPrice,
-    bool inStock,
+    bool? inStock,
     int? stock,
     double? rating,
     int? reviewCount,
@@ -186,39 +181,26 @@ class ECommerceCrawler<T extends EcommerceItem> extends StaticWebCrawler<T> {
   ECommerceCrawler({
     required super.name,
     required super.concurrentRequests,
-    List<Uri>? initialUris,
-    required this.navbarCollector,
-    required this.paginationCollector,
+    required this.selectors,
     required this.mainUrl,
-    required this.productBoxSelector,
-    required this.idSelector,
-    required this.nameSelector,
-    required this.currencySymbol,
-    this.descriptionSelector,
-    this.imageUrlSelector,
-    this.priceSelector,
-    this.originalPriceSelector,
-    this.inStockSelector,
-    this.stockSelector,
-    this.ratingSelector,
-    this.reviewCountSelector,
-    this.brandSelector,
-    this.categorySelector,
-    this.tagsSelector,
-    this.sellerSelector,
     required this.itemFactory,
-  }) : initialUris = initialUris ?? [];
+    this.initialUris = const [],
+    this.navbarCollector,
+    this.paginationCollector,
+    this.navigateToProductPage = false,
+  });
 
+  /// Generates initial URLs to crawl from navbar and initial URIs
   @override
   Stream<CrawlRequest> getUrls() async* {
     if (navbarCollector != null) {
       final client = BrowserHttpClient();
       final response = await client.send(CrawlRequest.get(mainUrl));
-      final links = navbarCollector!.collect(parse(response.body));
-      for (final link in links) {
+      for (final link in navbarCollector!.collect(parse(response.body))) {
         yield CrawlRequest.get(link);
       }
     }
+
     for (final link in initialUris) {
       yield CrawlRequest.get(link);
     }
@@ -232,146 +214,142 @@ class ECommerceCrawler<T extends EcommerceItem> extends StaticWebCrawler<T> {
     if (document is! HTMLDocument) return;
 
     final dom = document.document;
-    final nextPage = paginationCollector.collect(dom);
+    final isProductPage = response.request.depth == 2;
 
-    if (nextPage != null) {
-      yield ParsedLink(CrawlRequest(url: Uri.parse(nextPage)));
+    // Handle pagination on listing pages
+    if (!isProductPage && paginationCollector != null) {
+      final nextPage = paginationCollector!.collect(dom);
+      if (nextPage != null) {
+        yield ParsedLink(
+          CrawlRequest.get(
+            Uri.parse(nextPage),
+            depth: response.request.depth + 1,
+          ),
+        );
+      }
     }
 
-    final productBoxes = dom.querySelectorAll(productBoxSelector);
-    for (final productBox in productBoxes) {
-      // Extract required fields
-      final id = _extractId(productBox);
-      final name = _extractText(productBox, nameSelector);
-      final url = _extractUrl(productBox, "a", response.request.url);
-
-      // Extract optional fields
-      final description =
-          descriptionSelector != null
-              ? _extractText(productBox, descriptionSelector!)
-              : null;
-
-      final imageUrl =
-          imageUrlSelector != null
-              ? _extractAttribute(productBox, imageUrlSelector!, "src")
-              : null;
-
-      final price =
-          priceSelector != null
-              ? _extractPrice(productBox, priceSelector!)
-              : null;
-
-      final originalPrice =
-          originalPriceSelector != null
-              ? _extractPrice(productBox, originalPriceSelector!)
-              : null;
-
-      final inStock =
-          inStockSelector != null
-              ? !(_extractText(
-                    productBox,
-                    inStockSelector!,
-                  ).contains("out of stock") ||
-                  _extractText(
-                    productBox,
-                    inStockSelector!,
-                  ).contains("sold out"))
-              : true;
-
-      final stock =
-          stockSelector != null
-              ? _extractNumber(productBox, stockSelector!)
-              : null;
-
-      final rating =
-          ratingSelector != null
-              ? _extractRating(productBox, ratingSelector!)
-              : null;
-
-      final reviewCount =
-          reviewCountSelector != null
-              ? _extractNumber(productBox, reviewCountSelector!)
-              : null;
-
-      final brand =
-          brandSelector != null
-              ? _extractText(productBox, brandSelector!)
-              : null;
-
-      final category =
-          categorySelector != null
-              ? _extractText(productBox, categorySelector!)
-              : null;
-
-      final tags =
-          tagsSelector != null ? _extractTags(productBox, tagsSelector!) : null;
-
-      final seller =
-          sellerSelector != null
-              ? _extractText(productBox, sellerSelector!)
-              : null;
-
-      final item = itemFactory(
-        id,
-        name,
-        url,
-        currencySymbol,
-        description,
-        imageUrl,
-        price,
-        originalPrice,
-        inStock,
-        stock,
-        rating,
-        reviewCount,
-        brand,
-        category,
-        tags,
-        seller,
-        DateTime.now(),
+    // Handle product detail page
+    if (isProductPage) {
+      yield ParsedData(
+        _extractProduct(response, dom.querySelector("body")!, true),
       );
+      return;
+    }
 
-      yield ParsedData(item);
+    // Handle listing page with multiple products
+    for (final productBox in dom.querySelectorAll(
+      selectors.productBoxSelector,
+    )) {
+      if (navigateToProductPage) {
+        final link = productBox.querySelector("a")!.attributes["href"];
+        yield ParsedLink(
+          CrawlRequest.get(
+            response.request.url.replace(path: link),
+            depth: response.request.depth,
+          ),
+        );
+        continue;
+      }
+
+      yield ParsedData(_extractProduct(response, productBox, false));
     }
   }
 
-  // Helper methods for extraction
-  String _extractId(Element element) {
-    final idText =
-        _extractAttribute(element, idSelector, "data-product-id") ??
-        _extractAttribute(element, idSelector, "id") ??
-        _extractText(element, idSelector);
-    return idText.trim();
+  /// Extracts all product data from an HTML element using selectors
+  T _extractProduct(
+    CrawlResponse response,
+    Element productBox,
+    bool isProductPage,
+  ) {
+    // Helper function for text extraction
+    String? extractText(String? selector) =>
+        selector != null ? _getElementText(productBox, selector) : null;
+
+    // Extract all product data with simplified approach
+    return itemFactory(
+      selectors.idSelector != null ? _extractId(productBox) : null,
+      _getElementText(productBox, selectors.nameSelector),
+      isProductPage
+          ? response.request.url.toString()
+          : _extractUrl(productBox, "a", response.request.url),
+      "\$",
+      extractText(selectors.descriptionSelector),
+      selectors.imageUrlSelector != null
+          ? _extractAttribute(productBox, selectors.imageUrlSelector!, "src")
+          : null,
+      selectors.priceSelector != null
+          ? _extractPrice(productBox, selectors.priceSelector!)
+          : null,
+      selectors.originalPriceSelector != null
+          ? _extractPrice(productBox, selectors.originalPriceSelector!)
+          : null,
+      selectors.inStockSelector != null
+          ? !_getElementText(
+            productBox,
+            selectors.inStockSelector!,
+          ).contains(RegExp(r'out of stock|sold out', caseSensitive: false))
+          : true,
+      selectors.stockSelector != null
+          ? _extractNumber(productBox, selectors.stockSelector!)
+          : null,
+      selectors.ratingSelector != null
+          ? _extractRating(productBox, selectors.ratingSelector!)
+          : null,
+      selectors.reviewCountSelector != null
+          ? _extractNumber(productBox, selectors.reviewCountSelector!)
+          : null,
+      extractText(selectors.brandSelector),
+      extractText(selectors.categorySelector),
+      selectors.tagsSelector != null
+          ? _extractTags(productBox, selectors.tagsSelector!)
+          : null,
+      extractText(selectors.sellerSelector),
+      DateTime.now(),
+    );
   }
 
-  String _extractText(Element element, String selector) {
+  /// Gets text content from an element matching the selector
+  String _getElementText(Element element, String selector) {
     try {
       final selected = element.querySelector(selector);
       return selected != null ? selected.text.trim() : "";
-    } catch (e) {
+    } catch (_) {
       return "";
     }
   }
 
+  /// Extracts product ID from various possible sources
+  String? _extractId(Element element) {
+    if (selectors.idSelector == null) return null;
+    return _extractAttribute(
+          element,
+          selectors.idSelector!,
+          "data-product-id",
+        ) ??
+        _extractAttribute(element, selectors.idSelector!, "id") ??
+        _getElementText(element, selectors.idSelector!);
+  }
+
+  /// Extracts and normalizes URL from element
   String _extractUrl(Element element, String selector, Uri baseUrl) {
     try {
       final link = element.querySelector(selector);
       if (link != null) {
         final href = link.attributes["href"];
         if (href != null) {
-          if (href.startsWith('http')) {
-            return href;
-          } else {
-            return baseUrl.resolve(href).toString();
-          }
+          return href.startsWith('http')
+              ? href
+              : baseUrl.resolve(href).toString();
         }
       }
       return baseUrl.toString();
-    } catch (e) {
+    } catch (_) {
       return baseUrl.toString();
     }
   }
 
+  /// Extracts an attribute value from an element
   String? _extractAttribute(
     Element element,
     String selector,
@@ -379,79 +357,71 @@ class ECommerceCrawler<T extends EcommerceItem> extends StaticWebCrawler<T> {
   ) {
     try {
       final selected = element.querySelector(selector);
-      return selected != null ? selected.attributes[attribute]?.trim() : null;
-    } catch (e) {
+      return selected?.attributes[attribute]?.trim();
+    } catch (_) {
       return null;
     }
   }
 
+  /// Extracts and parses price value
   double? _extractPrice(Element element, String selector) {
     try {
-      final priceText = _extractText(element, selector)
-          .replaceAll(
-            RegExp(r'[^\d.,]'),
-            '',
-          ) // Remove currency symbols and other characters
-          .replaceAll(',', '.'); // Standardize decimal separator
-
-      return double.tryParse(priceText);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  int? _extractNumber(Element element, String selector) {
-    try {
-      final text = _extractText(
+      final priceText = _getElementText(
         element,
         selector,
-      ).replaceAll(RegExp(r'[^\d]'), ''); // Keep only digits
-
-      return int.tryParse(text);
-    } catch (e) {
+      ).replaceAll(RegExp(r'[^\d.,]'), '').replaceAll(',', '.');
+      return double.tryParse(priceText);
+    } catch (_) {
       return null;
     }
   }
 
+  /// Extracts and parses numeric values
+  int? _extractNumber(Element element, String selector) {
+    try {
+      return int.tryParse(
+        _getElementText(element, selector).replaceAll(RegExp(r'[^\d]'), ''),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Extracts and normalizes rating value
   double? _extractRating(Element element, String selector) {
     try {
-      // Try extracting from text first
-      final ratingText = _extractText(element, selector)
-          .replaceAll(
-            RegExp(r'[^\d.,/]'),
-            '',
-          ) // Keep only digits, dots, commas, and slashes
-          .replaceAll(',', '.'); // Standardize decimal separator
+      final ratingText = _getElementText(
+        element,
+        selector,
+      ).replaceAll(RegExp(r'[^\d.,/]'), '').replaceAll(',', '.');
 
-      // Check if it's in format like "4.5/5"
       if (ratingText.contains('/')) {
         final parts = ratingText.split('/');
         if (parts.length == 2) {
           final rating = double.tryParse(parts[0]);
           final scale = double.tryParse(parts[1]);
           if (rating != null && scale != null && scale > 0) {
-            return (rating / scale) * 5; // Normalize to 5-star scale
+            return (rating / scale) * 5;
           }
         }
       }
-
       return double.tryParse(ratingText);
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
 
+  /// Extracts multiple tags from elements
   List<String>? _extractTags(Element element, String selector) {
     try {
       final tagElements = element.querySelectorAll(selector);
-      if (tagElements.isNotEmpty) {
-        return tagElements
-            .map((e) => e.text.trim())
-            .where((s) => s.isNotEmpty)
-            .toList();
-      }
-      return null;
-    } catch (e) {
+      return tagElements.isNotEmpty
+          ? tagElements
+              .map((e) => e.text.trim())
+              .where((s) => s.isNotEmpty)
+              .toList()
+          : null;
+    } catch (_) {
       return null;
     }
   }
