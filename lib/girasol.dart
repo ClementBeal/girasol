@@ -24,6 +24,7 @@ export 'src/scrapers/e_commerce/items/e_commerce_basic.dart'
 export 'src/pipelines/pipeline.dart' show Pipeline;
 
 export 'src/pipelines/files/file_pipeline.dart' show FilePipeline, FileItem;
+export 'src/pipelines/files/html_pipeline.dart' show HTMLItem, HtmlPipeline;
 export 'src/pipelines/format/csv_pipeline.dart' show CSVPipeline, CsvItem;
 export 'src/pipelines/format/json_pipeline.dart' show JSONPipeline, JsonItem;
 export 'src/pipelines/format/xml_pipeline.dart' show XMLPipeline, XmlItem;
