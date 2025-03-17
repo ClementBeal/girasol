@@ -14,8 +14,11 @@ export 'src/scrapers/scraper.dart'
         JsonDocument,
         TextDocument;
 
-export 'src/scrapers/e_commerce_crawler.dart'
-    show ECommerceCrawler, EcommerceItem, ECommerceCrawlerSelectors;
+export 'src/scrapers/e_commerce/e_commerce_crawler.dart'
+    show ECommerceCrawler, ECommerceCrawlerSelectors;
+
+export 'src/scrapers/e_commerce/items/e_commerce_basic.dart'
+    show EcommerceItem, ECommerceClothe;
 
 // Pipelines export
 export 'src/pipelines/pipeline.dart' show Pipeline;
