@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:isolate';
+import 'package:girasol/src/utils/stats.dart';
+
 import '../girasol.dart';
 
 /// Base class for crawling results
@@ -183,13 +186,20 @@ class _CrawlerExecutor {
   /// They are visited during the second pass
   final nonVisitedUrls = <CrawlRequest>[];
 
-  _CrawlerExecutor({required this.crawler, required this.resultPort});
+  _CrawlerExecutor({required this.crawler, required this.resultPort})
+    : statCollector = CrawlerStats(crawler: crawler);
 
   /// If there is an Integer infinite, let's use it.
   /// It's a very big limit so we can crawl a website endlessly
   static final int _maxLimitDepth = 999_999_999;
 
+  final CrawlerStats statCollector;
+
   Future<void> run() async {
+    Timer.periodic(Duration(seconds: 10), (timer) {
+      statCollector.printAndReset();
+    });
+
     try {
       // Setup phase
       final setupClient = BrowserHttpClient();
@@ -246,6 +256,8 @@ class _CrawlerExecutor {
       print('Error in crawler ${crawler.runtimeType}: $e');
       print(stackTrace);
     } finally {
+      statCollector.stop();
+
       await _cleanup(crawler);
     }
   }
@@ -256,7 +268,6 @@ class _CrawlerExecutor {
     await Future.wait(
       batch.map((request) async {
         final result = await _processSingleUrl(request, crawler);
-
         if (result.newUrls.isNotEmpty) {
           nonVisitedUrls.addAll(result.newUrls);
         }
@@ -282,6 +293,8 @@ class _CrawlerExecutor {
 
       print("Parsing URL: ${request.url.toString()}");
       final response = await client.send(request);
+      // we add the response to the stat collector;
+      statCollector.addUrl(response);
 
       final contentType =
           response.headers["Content-Type"] ??
